@@ -1,15 +1,18 @@
 ﻿namespace DO;
-
-public record Assignment
 {
-    int Id;
-    int CallId;
-    int VolunteerId;
-    DateTime EntryTimeAssignment;
-    DateTime? EndTimeAssignment = null;
-    enum? EndTypeAssignment=null;
-    /// <summary>
-    ///  default ctor
-    /// </summary>
-    public Assignment() { }
+    public enum EndTypeAssignment { Treated,SelfCancellation, AdministratorCancellation, ExpiredCancellation }
+public record Assignment
+    (
+        int Id,
+        int CallId,
+        int VolunteerId,
+        DateTime EntryTimeAssignment,
+        DateTime? EndTimeAssignment = null,
+        EndTypeAssignment? EndTypeAssignment = null
+    )
+    {
+        // Default constructor
+        public Assignment() : this(0, 0, 0, new DateTime(), null, null) { }
+
+    }
 }

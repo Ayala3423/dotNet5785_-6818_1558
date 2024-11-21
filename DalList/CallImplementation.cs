@@ -7,49 +7,49 @@ public class CallImplementation : ICall
 {
     public void Create(Call item)
     {
-        if (item.id)
+        if (item.Id)
         {
-            if (DataSource.Calls.Any(e => e.id == item.id))
+            if (DataSource.Calls.Any(e => e.Id == item.Id))
                 throw new NotImplementedException($"The Call Item with id {item.id} is already exist");
-            DataSource.calls.Add(item);
+            DataSource.Calls.Add(item);
         }
         else
         {
-            Call itemCopy = item.Copy();
+            Call itemCopy = item;
             int newId = Config.NextAssignmentId; //לבדוק
-            itemCopy.id = newId;
-            DataSource.calls.Add(itemCopy);
-            return newId;
+            itemCopy.Id = newId;
+            DataSource.Calls.Add(itemCopy);
+            //return newId;
         }
     }
     public Call? Read(int id) 
     {
-       Call foundCall = DataSource.Calls.FirstOrDefault(e => e.id == id);
+       Call foundCall = DataSource.Calls.FirstOrDefault(e => e.Id == id);
         if (foundCall == null)
             return null;
         return foundCall;
     }
     public List<Call> ReadAll()
     {
-        return new List<Caii>(DataSource.Calls);
+        return new List<Call>(DataSource.Calls);
     }
     public void Update(Call item)
     {
 
-        if (!DataSource.Calls.Any(e => e.id == item.id))
+        if (!DataSource.Calls.Any(e => e.Id == item.Id))
             throw new NotImplementedException($"The Call Item with id {item.id} isn't exist");
-        DataSource.Calls.RemovAll(e => e.id == item.id);
+        DataSource.Calls.RemovAll(e => e.Id == item.Id);
         DataSource.Calls.Add(item);
 
     }
     public void Delete(int id)
     {
-        if (!DataSource.Calls.Any(e => e.id == item.id))
-            throw new NotImplementedException($"The Call Item with id {item.id} isn't exist");
-        DataSource.Calls.RemovAll(e => e.id ==id);
+        if (!DataSource.Calls.Any(e => e.Id == id))
+            throw new NotImplementedException($"The Call Item with id {id} isn't exist");
+        DataSource.Calls.RemovAll(e => e.Id == id);
     }
     public void DeleteAll()
     {
-        DataSource.Calls.clear()(e => e.id == id);
+        DataSource.Calls.Clear();
     }
 }
