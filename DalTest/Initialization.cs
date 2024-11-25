@@ -1,10 +1,10 @@
-﻿
-namespace DalTest;
+﻿namespace DalTest;
 
 using DalApi;
 using DO;
 using DalList;
 using System.Data;
+using System;
 
 public static class Initialization
 {
@@ -16,9 +16,221 @@ public static class Initialization
 
     private static void createAssignment()
     {
-    }
+        // טווח לפני ואחרי זמן הסיום
+        TimeSpan rangeBefore = TimeSpan.FromHours(5); // עד 5 שעות לפני
+        TimeSpan rangeAfter = TimeSpan.FromHours(3);  // עד 3 שעות אחרי
+
+        int timesGreater = 0; // מונה למקרים ש-randomTime יהיה גדול מ-EndCallTime
+
+        for (int i = 0; i < 50; i++)
+        {
+            int randomIndexCall = s_rand.Next(0, s_dalCall.ReadAll().Count - 15);
+            int randomIndexVolunteer = s_rand.Next(0, s_dalVolunteer.ReadAll().Count - 5);
+
+            int selectedIdCall = s_dalCall.ReadAll()[randomIndexCall].Id;
+            TimeSpan timeSpan = (TimeSpan)(s_dalCall.Read(selectedIdCall).EndCallTime - s_dalCall.Read(selectedIdCall).OpenCallTime);
+            double randomSeconds = s_rand.NextDouble() * timeSpan.TotalSeconds;
+
+            DateTime endCallTime = (DateTime)s_dalCall.Read(selectedIdCall).EndCallTime;
+            DateTime randomTime;
+            EndTypeAssignment endTypeAssignment;
+            // שליטה בערך של randomTime
+            if (timesGreater < 25 && i >= 30) // 20 פעמים ש-randomTime יהיה אחרי EndCallTime
+            {
+                double randomOffsetInSeconds = s_rand.NextDouble() * rangeAfter.TotalSeconds;
+                randomTime = endCallTime.AddSeconds(randomOffsetInSeconds); // זמן אחרי EndCallTime
+                timesGreater++;
+                endTypeAssignment = (EndTypeAssignment)s_rand.Next(0, 4);
+            }
+            else // 30 פעמים ש-randomTime יהיה קטן או שווה ל-EndCallTime
+            {
+                double randomOffsetInSeconds = -(s_rand.NextDouble() * rangeBefore.TotalSeconds);
+                randomTime = endCallTime.AddSeconds(randomOffsetInSeconds); // זמן לפני EndCallTime
+                endTypeAssignment = EndTypeAssignment.ExpiredCancellation;
+            }
+
+            // יצירת אובייקט Assignment
+            Assignment assignment = new Assignment(
+                s_dalConfig.NextCalled,
+                selectedIdCall,
+                s_dalVolunteer.ReadAll()[randomIndexVolunteer].Id,
+                s_dalCall.Read(selectedIdCall).OpenCallTime,
+                s_dalCall.Read(selectedIdCall).OpenCallTime.AddSeconds(randomSeconds),
+                randomTime,
+                endTypeAssignment
+            );
+
+            // בדיקת קיום והוספת Assignment
+            Assignment? checkAssignment = s_dalIAssignment.Read(assignment.Id);
+            if (checkAssignment == null)
+            {
+                s_dalIAssignment.Create(assignment);
+            }
+        }
+}
+
     private static void createCall()
     {
+        string[] CallAddresses = new string[]
+        {
+            "123 Main St, Springfield, IL 62701",
+            "456 Oak Ave, Los Angeles, CA 90001",
+            "789 Pine Rd, Miami, FL 33101",
+            "101 Maple Dr, Chicago, IL 60601",
+            "202 Birch Ln, Dallas, TX 75201",
+            "303 Elm St, New York, NY 10001",
+            "404 Cedar Blvd, Phoenix, AZ 85001",
+            "505 Redwood Way, Austin, TX 73301",
+            "606 Willow Ct, Seattle, WA 98101",
+            "707 Chestnut Ave, Denver, CO 80201",
+            "808 Aspen Blvd, San Francisco, CA 94101",
+            "909 Fir St, Boston, MA 02101",
+            "1010 Maple Ave, Portland, OR 97201",
+            "1111 Pine St, San Diego, CA 92101",
+            "1212 Oak Dr, Salt Lake City, UT 84101",
+            "1313 Cedar St, Detroit, MI 48201",
+            "1414 Birch Ave, Atlanta, GA 30301",
+            "1515 Elm Rd, Houston, TX 77001",
+            "1616 Willow Dr, Minneapolis, MN 55101",
+            "1717 Chestnut Rd, Philadelphia, PA 19101",
+            "1818 Redwood Ln, Orlando, FL 32801",
+            "1919 Aspen St, Indianapolis, IN 46201",
+            "2020 Cedar Dr, Dallas, TX 75202",
+            "2121 Fir Ave, Tampa, FL 33601",
+            "2222 Maple Ct, Nashville, TN 37201",
+            "2323 Oak St, Kansas City, MO 64101",
+            "2424 Pine Blvd, Charlotte, NC 28201",
+            "2525 Chestnut Ln, St. Louis, MO 63101",
+            "2626 Birch Rd, New Orleans, LA 70112",
+            "2727 Elm Blvd, San Antonio, TX 78201",
+            "2828 Cedar Ave, Raleigh, NC 27601",
+            "2929 Willow Rd, Cleveland, OH 44101",
+            "3030 Redwood Blvd, Memphis, TN 38101",
+            "3131 Fir Ct, Chicago, IL 60602",
+            "3232 Pine Ln, Washington, DC 20001",
+            "3333 Oak Rd, Richmond, VA 23220",
+            "3434 Maple St, Miami, FL 33102",
+            "3535 Birch Blvd, Houston, TX 77002",
+            "3636 Elm Ct, Los Angeles, CA 90002",
+            "3737 Willow St, Seattle, WA 98102",
+            "3838 Redwood Ave, Phoenix, AZ 85002",
+            "3939 Fir Blvd, Boston, MA 02102",
+            "4040 Chestnut Rd, Denver, CO 80202",
+            "4141 Aspen Dr, San Francisco, CA 94102",
+            "4242 Cedar Ct, Portland, OR 97202",
+            "4343 Birch Rd, Salt Lake City, UT 84102",
+            "4444 Elm Ln, Atlanta, GA 30302",
+            "4545 Willow Blvd, New York, NY 10002",
+            "4646 Redwood St, St. Louis, MO 63102",
+            "4747 Fir Rd, Orlando, FL 32802",
+            "4848 Chestnut Ln, Tampa, FL 33602",
+            "4949 Pine Ave, Charlotte, NC 28202"
+        };
+        double[] Latitudes = new double[]
+        {
+            39.7817, 34.0522, 25.7617, 41.8781, 32.7767,
+            40.7128, 33.4484, 30.2672, 47.6062, 39.7392,
+            37.7749, 42.3601, 45.5051, 32.7157, 40.7608,
+            42.3314, 33.7490, 29.7604, 44.9778, 39.9526,
+            28.5383, 39.7684, 32.7767, 27.9506, 36.1627,
+            39.0997, 35.2271, 38.6270, 29.9511, 29.4241,
+            35.7796, 41.4993, 35.1495, 41.8781, 38.9072,
+            37.5407, 25.7617, 29.7604, 34.0522, 47.6062,
+            33.4484, 42.3601, 39.7392, 37.7749, 45.5051,
+            40.7608, 33.7490, 40.7128, 38.6270, 28.5383,
+            27.9506, 35.2271
+        };
+        double[] Longitudes = new double[]
+        {
+            -89.6501, -118.2437, -80.1918, -87.6298, -96.7970,
+            -74.0060, -112.0740, -97.7431, -122.3321, -104.9903,
+            -122.4194, -71.0589, -122.6750, -117.1611, -111.8910,
+            -83.0458, -84.3880, -95.3698, -93.2650, -75.1652,
+            -81.3792, -86.1581, -96.7970, -82.4572, -86.7816,
+            -94.5786, -80.8431, -90.1994, -90.0715, -98.4936,
+            -78.6382, -81.6944, -90.0489, -87.6298, -77.0369,
+            -77.4360, -80.1918, -95.3698, -118.2437, -122.3321,
+            -112.0740, -71.0589, -104.9903, -122.4194, -122.6750,
+            -111.8910, -84.3880, -74.0060, -90.1994, -81.3792,
+            -82.4572, -80.8431
+        };
+        // תיאורי הכנת אוכל
+        string[] foodPreparation = {
+            "הכנת בייגלים למשפחה נצרכת",
+            "הכנת מרק חם למקלט לנזקקים",
+            "אפיית עוגיות לילדים חולים",
+            "בישול מנות חמות לחיילים בודדים",
+            "הכנת פסטה למרכז קהילתי",
+            "בישול תבשילים לשבת למשפחות רווחה",
+            "הכנת סלטים לכנס התנדבות",
+            "אריזת מנות אוכל לתושבים ותיקים",
+            "הכנת כריכים לתלמידים במצוקה",
+            "בישול מנות חג למשפחות במצוקה",
+            "הכנת מאפים לחג לילדים יתומים",
+            "הכנת קציצות לאנשים עם מוגבלות",
+            "הכנת לחמים ליום התנדבות קהילתי",
+            "בישול ממולאים לאנשים בודדים",
+            "הכנת פשטידות לחג עבור משפחות נזקקות",
+            "אריזת מזון מוכן לבית אבות",
+            "בישול מרקים לחורף למשפחות בסיכון",
+            "הכנת קינוחים ליום הולדת במקלט נשים",
+            "אפיית פיתות לפעילות קהילתית",
+            "בישול ירקות ממולאים לקשישים",
+            "אריזת סלטים לסטודנטים מעוטי יכולת",
+            "בישול אורז עם ירקות לחיילים בודדים",
+            "הכנת עוגות לתושבים ותיקים",
+            "הכנת טוסטים לכנס התרמה",
+            "הכנת רטבים לפסטה למרכז נוער"
+        };
+        // תיאורי העברת אוכל
+        string[] foodDelivery = {
+            "העברת עוף לשבת למשפחה נזקקת",
+            "חלוקת ירקות טריים לשוק הקהילתי",
+            "מסירת לחם חם לבית יתומים",
+            "חלוקת פירות למרכז חסד",
+            "העברת מנות חמות למשפחה קשת יום",
+            "מסירת קופסאות שימורים למשפחות",
+            "העברת חבילות מזון לקשישים",
+            "מסירת סלי מזון לנשים חד הוריות",
+            "חלוקת ארוחות בוקר לבתי ספר",
+            "העברת מזון כשר לחג למשפחות נזקקות",
+            "מסירת תרומות אוכל למרכז חסד",
+            "חלוקת פירות יבשים ליום המשפחה",
+            "העברת קציצות ומנות חמות למשפחה בסיכון",
+            "מסירת ארוחות מוכנות לשבת",
+            "חלוקת מאפים לחיילים בודדים",
+            "העברת שימורים לקהילות נזקקות",
+            "מסירת חלות שבת למשפחה רווחתית",
+            "חלוקת לחמים טריים לבית אבות",
+            "העברת חבילות מזון למרכז קליטה",
+            "מסירת פשטידות לחג לנזקקים",
+            "העברת ירקות למשפחה מעוטת יכולת",
+            "חלוקת עוגות יומולדת לילדים חולים",
+            "מסירת ארוחות מוכנות לחיילים בודדים",
+            "העברת שוקולדים ופרחים לנשים במקלטים",
+            "חלוקת מזון חם בשוק הקהילתי"
+        };
+        Random random = new Random();
+        
+        for (int i = 0; i < 25; i++)
+        {
+            Call call = new Call(s_dalConfig.NextCalled, CallAddresses[i], Latitudes[i], Longitudes[i], s_dalConfig.Clock.AddHours(-(random.Next(1, 5))), foodPreparation[i], s_dalConfig.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodPreparation);
+            Call? checkCall = s_dalCall.Read(call.Id);
+            if (checkCall != null)
+            {
+                s_dalCall.Create(checkCall);
+            }
+        }
+
+        for (int i = 0; i < 25; i++)
+        {
+            Call call = new Call(s_dalConfig.NextCalled, CallAddresses[i], Latitudes[25+i], Longitudes[25+i], s_dalConfig.Clock.AddHours(-(random.Next(1, 5))), foodDelivery[i], s_dalConfig.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodDelivery);
+            Call? checkCall = s_dalCall.Read(call.Id);
+            if (checkCall != null)
+            {
+                s_dalCall.Create(checkCall);
+            }
+        }
 
     }
     private static void createVolunteer()
@@ -115,7 +327,7 @@ public static class Initialization
             "רחוב אלנבי 60, תל אביב"
         };
 
-        Volunteer administarator = new Volunteer(random.Next(200000000, 400000001), "ayala", "meruven", "0501234567", "ayalaMeruven@gmail.com", "A1b!c89&eF3g", "רחוב דיזנגוף 10, תל אביב", null, null, null, true, Role.Administrator, DistanceType.AirDistance)
+        Volunteer administarator = new Volunteer(random.Next(200000000, 400000001), "ayala", "meruven", "0501234567", "ayalaMeruven@gmail.com", "A1b!c89&eF3g", "רחוב דיזנגוף 10, תל אביב", null, null, null, true, Role.Administrator, DistanceType.AirDistance);
             Volunteer? checkAdministarator = s_dalVolunteer.Read(administarator.Id);
         if (checkAdministarator != null)
         {
@@ -124,7 +336,7 @@ public static class Initialization
 
         for (int i = 0; i < 20; i++)
         {
-            Volunteer volunteer = new Volunteer(random.Next(200000000, 400000001), firstNames[i], lastNames[i], phoneNumbers[i], emails[i], passwords[i], addresses[i], null, null, null, true, Role.Volunteer, DistanceType.AirDistance)
+            Volunteer volunteer = new Volunteer(random.Next(200000000, 400000001), firstNames[i], lastNames[i], phoneNumbers[i], emails[i], passwords[i], addresses[i], null, null, random.Next(1, 101), true, Role.Volunteer, DistanceType.AirDistance);
             Volunteer? checkVolunteer = s_dalVolunteer.Read(volunteer.Id);
             if(checkVolunteer != null)
             {
