@@ -5,7 +5,7 @@
 
 public record Call
     (
-        /// <summary>
+        // <summary>
         /// Volunteer attrubutes
         /// </summary>
         int Id,
@@ -15,7 +15,7 @@ public record Call
         double Longitude,
         TypeCall TypeCall = TypeCall.foodPreparation,
         DateTime OpenCallTime,
-        DateTime? EndCalTime = null,
+        DateTime? EndCalTime = null
         /// <summary>
         ///  default ctor
         /// </summary>
