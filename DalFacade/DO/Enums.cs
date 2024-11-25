@@ -42,7 +42,7 @@ public enum MainMenu
 public enum EntitySubMenu
 {
     Exit,
-    Creat,
+    Create,
     Read,
     ReadAll,
     UpDate,
@@ -60,5 +60,12 @@ public enum ConfigSubMenu
     InsertNewValue,
     displayConfigValue,
     Reset
+}
+
+public enum Entities
+{
+    Assignment,
+    Call,
+    Volunteer
 }
         

@@ -14,7 +14,7 @@ public static class Initialization
     private static IConfig? s_dalConfig; //stage 1
     private static readonly Random s_rand = new();
 
-    private static void createAssignment()
+    private static void createAssignments()
     {
         // טווח לפני ואחרי זמן הסיום
         TimeSpan rangeBefore = TimeSpan.FromHours(5); // עד 5 שעות לפני
@@ -69,7 +69,7 @@ public static class Initialization
         }
 }
 
-    private static void createCall()
+    private static void createCalls()
     {
         string[] CallAddresses = new string[]
         {
@@ -233,7 +233,7 @@ public static class Initialization
         }
 
     }
-    private static void createVolunteer()
+    private static void createVolunteers()
     {
         Random random = new Random();
         string[] firstNames = new string[]
@@ -328,7 +328,7 @@ public static class Initialization
         };
 
         Volunteer administarator = new Volunteer(random.Next(200000000, 400000001), "ayala", "meruven", "0501234567", "ayalaMeruven@gmail.com", "A1b!c89&eF3g", "רחוב דיזנגוף 10, תל אביב", null, null, null, true, Role.Administrator, DistanceType.AirDistance);
-            Volunteer? checkAdministarator = s_dalVolunteer.Read(administarator.Id);
+        Volunteer? checkAdministarator = s_dalVolunteer.Read(administarator.Id);
         if (checkAdministarator != null)
         {
             s_dalVolunteer.Create(checkAdministarator);
@@ -338,10 +338,30 @@ public static class Initialization
         {
             Volunteer volunteer = new Volunteer(random.Next(200000000, 400000001), firstNames[i], lastNames[i], phoneNumbers[i], emails[i], passwords[i], addresses[i], null, null, random.Next(1, 101), true, Role.Volunteer, DistanceType.AirDistance);
             Volunteer? checkVolunteer = s_dalVolunteer.Read(volunteer.Id);
-            if(checkVolunteer != null)
+            if (checkVolunteer != null)
             {
                 s_dalVolunteer.Create(volunteer);
             }
         }
+    }
+    public static void Do(IAssignment? dalIAssignment, ICall? dalCall, IVolunteer? dalVolunteer, IConfig? dalConfig) //stage 1
+    {
+        s_dalAssignment = dalIAssignment ?? throw new NullReferenceException("DAL object can not be null!"); //stage 1
+        s_dalCall = dalCall ?? throw new NullReferenceException("DAL object can not be null!"); //stage 1
+        s_dalVolunteer = dalVolunteer ?? throw new NullReferenceException("DAL object can not be null!");
+      
+        Console.WriteLine("Reset Configuration values and List values...");
+        s_dalConfig.Reset(); 
+        s_dalAssignment.DeleteAll(); 
+        s_dalConfig.Reset(); 
+        s_dalCall.DeleteAll();
+        s_dalConfig.Reset(); 
+        s_dalVolunteer.DeleteAll();
+        //...
+        Console.WriteLine("Initializing Students list ...");
+        createAssignments();
+        createCalls();
+        createVolunteers();
+
     }
 }
