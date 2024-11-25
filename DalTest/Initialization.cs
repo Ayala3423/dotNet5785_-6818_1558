@@ -327,7 +327,20 @@ public static class Initialization
             "רחוב אלנבי 60, תל אביב"
         };
 
-        Volunteer administarator = new Volunteer(random.Next(200000000, 400000001), "ayala", "meruven", "0501234567", "ayalaMeruven@gmail.com", "A1b!c89&eF3g", "רחוב דיזנגוף 10, תל אביב", null, null, null, true, Role.Administrator, DistanceType.AirDistance);
+        Volunteer administarator = new Volunteer(
+            random.Next(200000000, 400000001),
+            "ayala",
+            "meruven",
+            "0501234567",
+            "ayalaMeruven@gmail.com",
+            "A1b!c89&eF3g",
+            "רחוב דיזנגוף 10, תל אביב",
+            null,
+            null,
+            null,
+            true,
+            Role.Administrator,
+            DistanceType.AirDistance);
             Volunteer? checkAdministarator = s_dalVolunteer.Read(administarator.Id);
         if (checkAdministarator != null)
         {
@@ -336,7 +349,20 @@ public static class Initialization
 
         for (int i = 0; i < 20; i++)
         {
-            Volunteer volunteer = new Volunteer(random.Next(200000000, 400000001), firstNames[i], lastNames[i], phoneNumbers[i], emails[i], passwords[i], addresses[i], null, null, random.Next(1, 101), true, Role.Volunteer, DistanceType.AirDistance);
+            Volunteer volunteer = new Volunteer(
+                random.Next(200000000, 400000001),
+                firstNames[i],
+                lastNames[i],
+                phoneNumbers[i],
+                emails[i],
+                passwords[i],
+                addresses[i],
+                null,
+                null,
+                random.Next(1, 101),
+                true,
+                Role.Volunteer,
+                DistanceType.AirDistance);
             Volunteer? checkVolunteer = s_dalVolunteer.Read(volunteer.Id);
             if(checkVolunteer != null)
             {
