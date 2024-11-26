@@ -1,78 +1,99 @@
-﻿using System;
-using System.Windows.Forms;
-
-
+﻿using DalApi;
+using Dal;
+using DO;
+using DalList;
+using System.Reflection.Metadata;
 namespace DalTest
-
-
 {
     internal class Program
     {
         private static IAssignment? s_Assignment = new AssignmentImplementation();
-        private static ICall? s_Call = new Calllementation();
+        private static ICall? s_Call = new CallImplementation();
         private static IVolunteer? s_Volunteer = new VolunteerImplementation();
         private static IConfig? s_dalConfig = new ConfigImplementation();
-        public DisplayMenu()
+        public static void DisplayMenu()
         {
             try
             {
                 Console.WriteLine("בחר פעולה מתוך התפריט:");
+                PrintMenuOptions<MainMenu>(); // הדפסת האפשרויות בתפריט הראשי
 
-                // הצגת הערכים של ה-enum למשתמש
-                foreach (MainMenu option in Enum.GetValues(typeof(MainMenu)))
-                {
-                    Console.WriteLine($"{(int)option}. {option}");
-                }
+                MainMenu selectedOption = GetMenuChoice<MainMenu>("בחר פעולה:");
 
-                // קלט מהמשתמש
-                int userChoice;
-                if (int.TryParse(Console.ReadLine(), out userChoice) && Enum.IsDefined(typeof(MainMenu), userChoice))
+                while (selectedOption != MainMenu.Exit) // התנאי ללולאה
                 {
-                    MainMenu selectedOption = (MainMenu)userChoice;
-                    Console.WriteLine($"בחרת את האפשרות: {selectedOption}");
-                    while (selectedOption)
+                    switch (selectedOption)
                     {
-                        switch (selectedOption)
-                        {
-                            case 1:
-                                DisplayEntitySubMenu(s_Assignment);
-                                break;
-                            case 2:
-                                DisplayEntitySubMenu(s_Call);
-                                break;
-                            case 3:
-                                DisplayEntitySubMenu(s_Volunteer);
-                                break;
-                            case 4:
-                                ResetDataBase();
-                                break;
-                            case 5:
-                                DisplayDataBase();
-                                break;
-                            case 6:
-                                displayConfigSubMenu();
-                                break;
-                            case 7:
-                                ResetData();
-                                break;
-                            default:
-                                break;
-                        }
+                        case MainMenu.AssignmentSubMenu:
+                            DisplayEntitySubMenu();
+                            break;
+                        case MainMenu.CallSubMenu:
+                            // קוד לעבודה עם Call
+                            break;
+                        case MainMenu.VolunteerSubMenu:
+                            // קוד לעבודה עם Volunteer
+                            break;
+                        case MainMenu.DataInitilization:
+                            ResetDataBase();
+                            break;
+                        case MainMenu.DataPresentation:
+                            DisplayDataBase();
+                            break;
+                        case MainMenu.ConfigSubMenu:
+                            displayConfigSubMenu();
+                            break;
+                        case MainMenu.Reset:
+                            ResetData();
+                            break;
+                        default:
+                            Console.WriteLine("בחירה לא חוקית.");
+                            break;
                     }
 
+                    // מבקשים מהמשתמש לבחור שוב פעולה
+                    Console.WriteLine("\nבחר פעולה נוספת או Exit לסיום:");
+                    PrintMenuOptions<MainMenu>();
+                    selectedOption = GetMenuChoice<MainMenu>("בחר פעולה:");
+                }
+
+                Console.WriteLine("יציאה מהתפריט...");
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine($"שגיאה: {exception.Message}");
+            }
+        }
+
+        // פונקציה להדפסת האפשרויות בתפריט
+        private static void PrintMenuOptions<T>() where T : Enum
+        {
+            foreach (T option in Enum.GetValues(typeof(T)))
+            {
+                Console.WriteLine($"{(int)(object)option}. {option}");
+            }
+        }
+
+        // פונקציה לקבלת בחירה מהמשתמש
+        private static T GetMenuChoice<T>(string prompt) where T : Enum
+        {
+            T selectedOption = default; // ערך ברירת מחדל
+            while (true)
+            {
+                Console.WriteLine(prompt);
+                if (int.TryParse(Console.ReadLine(), out int userChoice) && Enum.IsDefined(typeof(T), userChoice))
+                {
+                    selectedOption = (T)(object)userChoice;
+                    break; // יציאה מהלולאה כאשר הקלט חוקי
                 }
                 else
                 {
-                    Console.WriteLine("בחירה לא חוקית.");
+                    Console.WriteLine("בחירה לא חוקית. נסה שוב.");
                 }
-
             }
-            catch (string exception)
-            {
-                Console.WriteLine(exception);
-            }
+            return selectedOption;
         }
-        public DisplayEntitySubMenu(object type)
+
+        public static void DisplayEntitySubMenu()
         {
 
             Console.WriteLine("בחר פעולה מתוך התפריט:");
@@ -89,38 +110,84 @@ namespace DalTest
             {
                 EntitySubMenu selectedOption = (EntitySubMenu)userChoice;
                 Console.WriteLine($"בחרת את האפשרות: {selectedOption}");
-                while (selectedOption)
+                while (selectedOption != EntitySubMenu.Exit)
                 {
                     try
                     {
                         switch (selectedOption)
                         {
-                            case 1:
-                                AddEntity();
+                            case EntitySubMenu.Create:
+                                AddEntity("Assignment");
                                 break;
-                            case 2:
-                                Console.WriteLine("בחר פעולה מתוך התפריט:");
-                                int IdNumber = Console.ReadLine();
-                                type.Read(IdNumber);
+                            case EntitySubMenu.Read:
+                                Console.WriteLine("הכנס מספר מזהה:");
+                                string inputRead = Console.ReadLine();
+                                int.TryParse(inputRead, out int IdNumberRead);
+                                s_Assignment.Read(IdNumberRead);
                                 break;
-                            case 3:
-                                type.ReadAll();
+                            case EntitySubMenu.ReadAll:
+                                s_Assignment.ReadAll();
                                 break;
-                            case 4:
-                                type.Update();
+                            case EntitySubMenu.UpDate:
+                                Console.WriteLine("הכנס מספר מזהה:");
+                                string inputUpdate = Console.ReadLine();
+                                int.TryParse(inputUpdate, out int IdNumberUpdate);
+                                Console.WriteLine("בחר פרמטר לשינוי:");
+                                string parameterToUpdate = Console.ReadLine();
+                                Assignment assignment = s_Assignment.Read(IdNumberUpdate);
+                                switch (parameterToUpdate)
+                                {
+                                    case "Id":
+                                        Console.WriteLine("Enter new Id:");
+                                        int newId = GetIntFromUser();
+                                        assignment = assignment with { Id = newId };
+                                        break;
+                                    case "CallId":
+                                        Console.WriteLine("Enter new CallId:");
+                                        int newCallId = GetIntFromUser();
+                                        assignment = assignment with { CallId = newCallId };
+                                        break;
+                                    case "VolunteerId":
+                                        Console.WriteLine("Enter new VolunteerId:");
+                                        int newVolunteerId = GetIntFromUser();
+                                        assignment = assignment with { VolunteerId = newVolunteerId };
+                                        break;
+                                    case "EntryTimeAssignment":
+                                        Console.WriteLine("Enter new Entry Time (yyyy-MM-dd HH:mm):");
+                                        DateTime newEntryTime = GetDateTimeFromUser();
+                                        assignment = assignment with { EntryTimeAssignment = newEntryTime };
+                                        break;
+                                    case "EndTimeAssignment":
+                                        Console.WriteLine("Enter new End Time (yyyy-MM-dd HH:mm) or leave empty:");
+                                        DateTime ? newEndTime = GetNullableDateTimeFromUser();
+                                        assignment = assignment with { EndTimeAssignment = newEndTime };
+                                        break;
+                                    case "EndTypeAssignment":
+                                        Console.WriteLine("Enter new End Type Assignment:");
+                                        EndTypeAssignment ? newEndType = GetNullableEnumFromUser<EndTypeAssignment>();
+                                        assignment = assignment with { EndTypeAssignment = newEndType };
+                                        break;
+                                    default:
+                                        Console.WriteLine("Invalid parameter name. No changes made.");
+                                        break;
+                                }
+                                s_Assignment.Update(assignment);
                                 break;
-                            case 5:
-                                type.Delete();
+                            case EntitySubMenu.Delete:
+                                Console.WriteLine("הכנס מספר מזהה:");
+                                string inputDelete = Console.ReadLine();
+                                int.TryParse(inputDelete, out int IdNumberDelete);
+                                s_Assignment.Delete(IdNumberDelete);
                                 break;
-                            case 6:
-                                type.DeleteAll();
+                            case EntitySubMenu.DeleteAll:
+                                s_Assignment.DeleteAll();
                                 break;
                             default:
                                 break;
                         }
                     }
 
-                    catch (string exception)
+                    catch (Exception exception)
                     {
                         Console.WriteLine(exception);
                     }
@@ -131,61 +198,37 @@ namespace DalTest
             {
                 Console.WriteLine("בחירה לא חוקית.");
             }
-
-
         }
-        public AddEntity(Entities type)
+
+        public static void AddEntity(string type)
         {
-            switch (type){
-                case 0:
-                    int id = GetIntFromUser("Enter Assignment Id:");
-                    int callId = GetIntFromUser("Enter CallId:");
-                    int volunteerId = GetIntFromUser("Enter VolunteerId:");
-                    DateTime entryTime = GetDateTimeFromUser("Enter Entry Time (yyyy-MM-dd HH:mm):");
-                    DateTime? endTime = GetNullableDateTimeFromUser("Enter End Time (yyyy-MM-dd HH:mm) or leave empty for null:");
-                    EndTypeAssignment? endType = GetNullableEnumFromUser<EndTypeAssignment>("Enter End Type Assignment (Treated, SelfCancellation, AdministratorCancellation, ExpiredCancellation) or leave empty for null:");
-                    Assignment newAssignment = new Assignment(id, callId, volunteerId, entryTime, endTime, endType);
-                    s_Assignment.Create(newAssignment);
-                    break;
-
-                case 1:
-                    int id = GetIntFromUser("Enter Assignment Id:");
-                    int callId = GetIntFromUser("Enter Address:");
-                    int volunteerId = GetIntFromUser("Enter Latitude:");
-                    DateTime entryTime = GetDateTimeFromUser("Enter Entry Time (yyyy-MM-dd HH:mm):");
-                    DateTime? endTime = GetNullableDateTimeFromUser("Enter End Time (yyyy-MM-dd HH:mm) or leave empty for null:");
-                    EndTypeAssignment? endType = GetNullableEnumFromUser<EndTypeAssignment>("Enter End Type Assignment (Treated, SelfCancellation, AdministratorCancellation, ExpiredCancellation) or leave empty for null:");
-                    Assignment newAssignment = new Assignment(id, callId, volunteerId, entryTime, endTime, endType);
-                    s_Assignment.Create(newAssignment);
-                    break;
-
-                case 2:
-                    int id = GetIntFromUser("Enter Assignment Id:");
-                    int callId = GetIntFromUser("Enter CallId:");
-                    int volunteerId = GetIntFromUser("Enter VolunteerId:");
-                    DateTime entryTime = GetDateTimeFromUser("Enter Entry Time (yyyy-MM-dd HH:mm):");
-                    DateTime? endTime = GetNullableDateTimeFromUser("Enter End Time (yyyy-MM-dd HH:mm) or leave empty for null:");
-                    EndTypeAssignment? endType = GetNullableEnumFromUser<EndTypeAssignment>("Enter End Type Assignment (Treated, SelfCancellation, AdministratorCancellation, ExpiredCancellation) or leave empty for null:");
-                    Assignment newAssignment = new Assignment(id, callId, volunteerId, entryTime, endTime, endType);
-                    s_Assignment.Create(newAssignment);
-                    break;
-            }
-            
+            Console.WriteLine("Enter Volunteer Id:");
+            int volunteerId = GetIntFromUser();
+            Console.WriteLine("Enter Entry Time (yyyy-MM-dd HH:mm):");
+            DateTime entryTime = GetDateTimeFromUser();
+            Console.WriteLine("Enter End Time (yyyy-MM-dd HH:mm) or leave empty for null:");
+            DateTime? endTime = GetNullableDateTimeFromUser();
+            Console.WriteLine("Enter End Type Assignment (Treated, SelfCancellation, AdministratorCancellation, ExpiredCancellation) or leave empty for null:");
+            EndTypeAssignment? endType = GetNullableEnumFromUser<EndTypeAssignment>();
+            Assignment newAssignment = new Assignment(0, 0, volunteerId, entryTime, endTime, endType);
+            s_Assignment.Create(newAssignment);
         }
-       
-        public NewConfigValue()
+
+        public static void NewConfigValue()
         {
 
         }
-        public DisplayConfigValue()
+
+        public static void DisplayConfigValue()
         {
 
         }
-        public displayConfigSubMenu()
+
+        public static void displayConfigSubMenu()
         {
             try
             {
-                Console.WriteLine("בחר פעולה מתוך התפריט:");
+                Console.WriteLine("Enter an option");
 
                 // הצגת הערכים של ה-enum למשתמש
                 foreach (ConfigSubMenu option in Enum.GetValues(typeof(ConfigSubMenu)))
@@ -199,29 +242,29 @@ namespace DalTest
                 {
                     ConfigSubMenu selectedOption = (ConfigSubMenu)userChoice;
                     Console.WriteLine($"בחרת את האפשרות: {selectedOption}");
-                    while (selectedOption)
+                    while (selectedOption != ConfigSubMenu.Exit)
                     {
                         switch (selectedOption)
                         {
-                            case 1:
+                            case ConfigSubMenu.AdvanceSystemClockMinute:
                                 s_dalConfig.Clock.AddMinutes(1);
                                 break;
-                            case 2:
+                            case ConfigSubMenu.AdvanceSystemClockHour:
                                 s_dalConfig.Clock.AddHours(1);
                                 break;
-                            case 3:
+                            case ConfigSubMenu.AdvanceSystemClockSecond:
                                 s_dalConfig.Clock.AddSeconds(1);
                                 break;
-                            case 4:
+                            case ConfigSubMenu.DisplaySystemClock:
                                 Console.WriteLine(s_dalConfig.Clock);
                                 break;
-                            case 5:
+                            case ConfigSubMenu.InsertNewValue:
                                 NewConfigValue();
                                 break;
-                            case 6:
+                            case ConfigSubMenu.DisplayConfigValue:
                                 DisplayConfigValue();
                                 break;
-                            case 7:
+                            case ConfigSubMenu.Reset:
                                 s_dalConfig.Reset();
                                 break;
                             default:
@@ -236,60 +279,61 @@ namespace DalTest
                 }
 
             }
-            catch (string exception)
+            catch (Exception exception)
             {
                 Console.WriteLine(exception);
             }
         }
 
-        public ResetDataBase()
+        public static void ResetDataBase()
         {
             Initialization.Do(s_Assignment, s_Call, s_Volunteer, s_dalConfig);
         }
 
-        public DisplayDataBase()
+        public static void DisplayDataBase()
         {
             DisplayEntity(s_Assignment.ReadAll(), "Assignment");
             DisplayEntity(s_Volunteer.ReadAll(), "Volunteer");
-            DisplayEntity(s_dalConfigt.ReadAll(), "dalConfig");
+            DisplayEntity(s_Call.ReadAll(), "dalConfig");
         }
 
-        public DisplayEntity(List list, string type)
+        public static void DisplayEntity<T>(List<T> list, string type)
         {
-            foreach (type item in list)
+            Console.WriteLine($"Displaying entities of type: {type}");
+            foreach (T item in list)
             {
                 Console.WriteLine(item);
             }
         }
 
-        public ResetData()
+        public static void ResetData()
         {
             s_dalConfig.Reset();
-            s_dalIAssignment.DeleteAll();
+            s_Assignment.DeleteAll();
             s_dalConfig.Reset();
-            s_dalCall.DeleteAll();
+            s_Call.DeleteAll();
             s_dalConfig.Reset();
-            s_dalVolunteer.DeleteAll();
+            s_Volunteer.DeleteAll();
         }
-        static int GetIntFromUser(string prompt) =>
+
+        static int GetIntFromUser() =>
             int.TryParse(Console.ReadLine(), out int value) ? value : 0;
 
-        static DateTime GetDateTimeFromUser(string prompt) =>
+        static DateTime GetDateTimeFromUser() =>
             DateTime.TryParse(Console.ReadLine(), out DateTime value) ? value : DateTime.Now;
 
-        static DateTime? GetNullableDateTimeFromUser(string prompt) =>
+        static DateTime? GetNullableDateTimeFromUser() =>
             string.IsNullOrEmpty(Console.ReadLine()) ? (DateTime?)null : DateTime.Parse(Console.ReadLine());
 
-        static T? GetNullableEnumFromUser<T>(string prompt) where T : struct
+        static T? GetNullableEnumFromUser<T>() where T : struct
         {
             string input = Console.ReadLine();
             return string.IsNullOrEmpty(input) ? (T?)null : Enum.TryParse(input, true, out T result) ? result : (T?)null;
         }
+
         static void Main(string[] args)
         {
             DisplayMenu();
-
         }
-
     }
 }

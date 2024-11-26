@@ -14,4 +14,4 @@ public record Assignment
         public Assignment() : this(0, 0, 0, new DateTime(), null, null) { }
 
     }
-}
+

@@ -3,18 +3,18 @@
 internal class Enums
 {
 }
-public enum EndTypeAssignment 
-{ 
-    Treated, 
-    SelfCancellation, 
-    AdministratorCancellation, 
-    ExpiredCancellation 
+public enum EndTypeAssignment
+{
+    Treated,
+    SelfCancellation,
+    AdministratorCancellation,
+    ExpiredCancellation
 }
 
-public enum TypeCall 
-{ 
-    FoodPreparation, 
-    FoodDelivery 
+public enum TypeCall
+{
+    FoodPreparation,
+    FoodDelivery
 }
 
 public enum DistanceType
@@ -23,9 +23,41 @@ public enum DistanceType
     WalkingDistance,
     DrivingDistance
 }
-public enum Role 
-{ 
-    Administrator, 
-    Volunteer 
+public enum Role
+{
+    Administrator,
+    Volunteer
+}
+public enum MainMenu
+{
+    Exit,
+    AssignmentSubMenu,
+    CallSubMenu,
+    VolunteerSubMenu,
+    DataInitilization,
+    DataPresentation,
+    ConfigSubMenu,
+    Reset,
+}
+public enum EntitySubMenu
+{
+    Exit,
+    Create,
+    Read,
+    ReadAll,
+    UpDate,
+    Delete,
+    DeleteAll
 }
 
+public enum ConfigSubMenu
+{
+    Exit,
+    AdvanceSystemClockMinute,
+    AdvanceSystemClockHour,
+    AdvanceSystemClockSecond,
+    DisplaySystemClock,
+    InsertNewValue,
+    DisplayConfigValue,
+    Reset
+}

@@ -8,7 +8,7 @@ using System;
 
 public static class Initialization
 {
-    private static IAssignment? s_dalIAssignment; //stage 1
+    private static IAssignment? s_dalAssignment; //stage 1
     private static ICall? s_dalCall; //stage 1
     private static IVolunteer? s_dalVolunteer; //stage 1
     private static IConfig? s_dalConfig; //stage 1
@@ -56,15 +56,15 @@ public static class Initialization
                 s_dalVolunteer.ReadAll()[randomIndexVolunteer].Id,
                 s_dalCall.Read(selectedIdCall).OpenCallTime,
                 s_dalCall.Read(selectedIdCall).OpenCallTime.AddSeconds(randomSeconds),
-                randomTime,
+                //randomTime,
                 endTypeAssignment
             );
 
             // בדיקת קיום והוספת Assignment
-            Assignment? checkAssignment = s_dalIAssignment.Read(assignment.Id);
+            Assignment? checkAssignment = s_dalAssignment.Read(assignment.Id);
             if (checkAssignment == null)
             {
-                s_dalIAssignment.Create(assignment);
+                s_dalAssignment.Create(assignment);
             }
         }
 }

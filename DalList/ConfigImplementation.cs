@@ -1,18 +1,15 @@
-﻿
-
-using DalApi;
+﻿using DalApi;
 
 namespace Dal;
 
 public class ConfigImplementation : IConfig
 {
-    public DateTime Clock {
-        get => Config.Clock;
-        set => Config.Clock = value;
-    }
+    public DateTime Clock { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+    public int NextCalled => throw new NotImplementedException();
 
     public void Reset()
     {
-        Config.Reset();
+        throw new NotImplementedException();
     }
 }

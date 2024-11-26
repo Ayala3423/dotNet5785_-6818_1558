@@ -1,7 +1,5 @@
 ﻿namespace DalApi;
-
 using DO;
-
 public interface IAssignment
 {
     void Create(Assignment item); //Creates new entity object in DAL
