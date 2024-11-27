@@ -11,7 +11,7 @@ public static class Initialization
     private static IAssignment? s_dalAssignment; //stage 1
     private static ICall? s_dalCall; //stage 1
     private static IVolunteer? s_dalVolunteer; //stage 1
-    private static IConfig? s_dalConfig; //stage 1
+    private static readonly IConfig? s_dalConfig; //stage 1
     private static readonly Random s_rand = new();
 
     private static void createAssignments()
@@ -51,7 +51,7 @@ public static class Initialization
 
             // יצירת אובייקט Assignment
             Assignment assignment = new Assignment(
-                s_dalConfig.NextCalled,
+                0,
                 selectedIdCall,
                 s_dalVolunteer.ReadAll()[randomIndexVolunteer].Id,
                 s_dalCall.Read(selectedIdCall).OpenCallTime,
@@ -154,7 +154,6 @@ public static class Initialization
             -111.8910, -84.3880, -74.0060, -90.1994, -81.3792,
             -82.4572, -80.8431
         };
-        // תיאורי הכנת אוכל
         string[] foodPreparation = {
             "הכנת בייגלים למשפחה נצרכת",
             "הכנת מרק חם למקלט לנזקקים",
@@ -182,7 +181,6 @@ public static class Initialization
             "הכנת טוסטים לכנס התרמה",
             "הכנת רטבים לפסטה למרכז נוער"
         };
-        // תיאורי העברת אוכל
         string[] foodDelivery = {
             "העברת עוף לשבת למשפחה נזקקת",
             "חלוקת ירקות טריים לשוק הקהילתי",
@@ -210,29 +208,31 @@ public static class Initialization
             "העברת שוקולדים ופרחים לנשים במקלטים",
             "חלוקת מזון חם בשוק הקהילתי"
         };
+
         Random random = new Random();
         
         for (int i = 0; i < 25; i++)
         {
-            Call call = new Call(s_dalConfig.NextCalled, CallAddresses[i], Latitudes[i], Longitudes[i], s_dalConfig.Clock.AddHours(-(random.Next(1, 5))), foodPreparation[i], s_dalConfig.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodPreparation);
-            Call? checkCall = s_dalCall.Read(call.Id);
+            Call call = new Call(0, CallAddresses[i], Latitudes[i], Longitudes[i], s_dalConfig.Clock.AddHours(-(random.Next(1, 5))), foodPreparation[i], s_dalConfig.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodPreparation);
+            Call? checkCall = s_dalCall?.Read(call.Id);
             if (checkCall != null)
             {
-                s_dalCall.Create(checkCall);
+                s_dalCall?.Create(checkCall);
             }
         }
 
         for (int i = 0; i < 25; i++)
         {
-            Call call = new Call(s_dalConfig.NextCalled, CallAddresses[i], Latitudes[25+i], Longitudes[25+i], s_dalConfig.Clock.AddHours(-(random.Next(1, 5))), foodDelivery[i], s_dalConfig.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodDelivery);
-            Call? checkCall = s_dalCall.Read(call.Id);
+            Call call = new Call(0, CallAddresses[i], Latitudes[25+i], Longitudes[25+i], s_dalConfig.Clock.AddHours(-(random.Next(1, 5))), foodDelivery[i], s_dalConfig.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodDelivery);
+            Call? checkCall = s_dalCall?.Read(call.Id);
             if (checkCall != null)
             {
-                s_dalCall.Create(checkCall);
+                s_dalCall?.Create(checkCall);
             }
         }
 
     }
+
     private static void createVolunteers()
     {
         Random random = new Random();
@@ -357,20 +357,20 @@ public static class Initialization
             }
         }
     }
-    public static void Do(IAssignment? dalIAssignment, ICall? dalCall, IVolunteer? dalVolunteer, IConfig? dalConfig) //stage 1
+
+    public static void Do(IAssignment? dalIAssignment, ICall? dalCall, IVolunteer? dalVolunteer) //stage 1
     {
         s_dalAssignment = dalIAssignment ?? throw new NullReferenceException("DAL object can not be null!"); //stage 1
         s_dalCall = dalCall ?? throw new NullReferenceException("DAL object can not be null!"); //stage 1
         s_dalVolunteer = dalVolunteer ?? throw new NullReferenceException("DAL object can not be null!");
       
         Console.WriteLine("Reset Configuration values and List values...");
-        s_dalConfig.Reset(); 
+        s_dalConfig?.Reset(); 
         s_dalAssignment.DeleteAll(); 
-        s_dalConfig.Reset(); 
+        s_dalConfig?.Reset(); 
         s_dalCall.DeleteAll();
-        s_dalConfig.Reset(); 
+        s_dalConfig?.Reset(); 
         s_dalVolunteer.DeleteAll();
-        //...
         Console.WriteLine("Initializing Students list ...");
         createAssignments();
         createCalls();

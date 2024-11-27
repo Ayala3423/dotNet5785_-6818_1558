@@ -159,12 +159,12 @@ namespace DalTest
                                         break;
                                     case "EndTimeAssignment":
                                         Console.WriteLine("Enter new End Time (yyyy-MM-dd HH:mm) or leave empty:");
-                                        DateTime ? newEndTime = GetNullableDateTimeFromUser();
+                                        DateTime? newEndTime = GetNullableDateTimeFromUser();
                                         assignment = assignment with { EndTimeAssignment = newEndTime };
                                         break;
                                     case "EndTypeAssignment":
                                         Console.WriteLine("Enter new End Type Assignment:");
-                                        EndTypeAssignment ? newEndType = GetNullableEnumFromUser<EndTypeAssignment>();
+                                        EndTypeAssignment? newEndType = GetNullableEnumFromUser<EndTypeAssignment>();
                                         assignment = assignment with { EndTypeAssignment = newEndType };
                                         break;
                                     default:
@@ -202,16 +202,77 @@ namespace DalTest
 
         public static void AddEntity(string type)
         {
-            Console.WriteLine("Enter Volunteer Id:");
-            int volunteerId = GetIntFromUser();
-            Console.WriteLine("Enter Entry Time (yyyy-MM-dd HH:mm):");
-            DateTime entryTime = GetDateTimeFromUser();
-            Console.WriteLine("Enter End Time (yyyy-MM-dd HH:mm) or leave empty for null:");
-            DateTime? endTime = GetNullableDateTimeFromUser();
-            Console.WriteLine("Enter End Type Assignment (Treated, SelfCancellation, AdministratorCancellation, ExpiredCancellation) or leave empty for null:");
-            EndTypeAssignment? endType = GetNullableEnumFromUser<EndTypeAssignment>();
-            Assignment newAssignment = new Assignment(0, 0, volunteerId, entryTime, endTime, endType);
-            s_Assignment.Create(newAssignment);
+            switch (type)
+            {
+                case "Assignment":
+                    Console.WriteLine("Enter Volunteer Id:");
+                    int AssignmentVolunteerId = GetIntFromUser();
+                    Console.WriteLine("Enter Entry Time (yyyy-MM-dd HH:mm):");
+                    DateTime entryTime = GetDateTimeFromUser();
+                    Console.WriteLine("Enter End Time (yyyy-MM-dd HH:mm) or leave empty for null:");
+                    DateTime? endTime = GetNullableDateTimeFromUser();
+                    Console.WriteLine("Enter End Type Assignment (Treated, SelfCancellation, AdministratorCancellation, ExpiredCancellation) or leave empty for null:");
+                    EndTypeAssignment? endType = GetNullableEnumFromUser<EndTypeAssignment>();
+                    Assignment newAssignment = new Assignment(0, 0, AssignmentVolunteerId, entryTime, endTime, endType);
+                    s_Assignment.Create(newAssignment);
+                    break;
+                case "Call":
+                    Console.WriteLine("Enter Address:");
+                    string callAddress = Console.ReadLine();
+                    Console.WriteLine("Enter Latitude:");
+                    double callLatitude = GetDoubleFromUser();
+                    Console.WriteLine("Enter Longitude:");
+                    double callLongitude = GetDoubleFromUser();
+                    Console.WriteLine("Enter OpenCallTime:");
+                    DateTime callOpenCallTime = GetDateTimeFromUser();
+                    Console.WriteLine("Enter DescribeCall:");
+                    string? callDescribeCall = Console.ReadLine();
+                    Console.WriteLine("Enter EndCallTime:");
+                    DateTime? callEndCallTime = GetNullableDateTimeFromUser();
+                    Console.WriteLine("Enter TypeCall:");
+                    TypeCall typeCall = GetEnumFromUser<TypeCall>();
+                    Call newCall = new Call(0, callAddress, callLatitude, callLongitude, callOpenCallTime, callDescribeCall, callEndCallTime, typeCall);
+                    s_Call.Create(newCall);
+                    break;
+
+                case "Volunteer":
+                    Console.WriteLine("Enter Volunteer Id:");
+                    int volunteerId = GetIntFromUser();
+                    Console.WriteLine("Enter First Name:");
+                    string volunteerFirstName = Console.ReadLine();
+                    Console.WriteLine("Enter Last Name:");
+                    string volunteerLastName = Console.ReadLine();
+                    Console.WriteLine("Enter Phone Number:");
+                    string volunteerPhone = Console.ReadLine();
+                    Console.WriteLine("Enter Email:");
+                    string volunteerEmail = Console.ReadLine();
+                    Console.WriteLine("Enter Password:");
+                    string volunteerPassword = Console.ReadLine();
+                    Console.WriteLine("Enter Address:");
+                    string volunteerAddress = Console.ReadLine();
+                    Console.WriteLine("Enter Latitude:");
+                    double volunteerLatitude = GetDoubleFromUser();
+                    Console.WriteLine("Enter Longitude:");
+                    double volunteerLongitude = GetDoubleFromUser();
+                    Console.WriteLine("Enter Distance:");
+                    double volunteerDistance = GetDoubleFromUser();
+                    Console.WriteLine("Enter If Active:");
+                    bool volunteerActive = GetBoolFromUser();
+                    Console.WriteLine("Enter Role:");
+                    Role role = GetEnumFromUser<Role>();
+                    Console.WriteLine("Enter DistanceType:");
+                    DistanceType distanceType = GetEnumFromUser<DistanceType>();
+                    Volunteer newVolunteer = new Volunteer(volunteerId,
+                        volunteerFirstName,
+                        volunteerLastName,
+                        volunteerPhone, volunteerEmail,
+                        volunteerPassword,
+                        volunteerAddress, volunteerLatitude,
+                        volunteerLongitude, volunteerDistance,
+                        volunteerActive, role, distanceType);
+                    s_Volunteer.Create(newVolunteer);
+                    break;
+            }
         }
 
         public static void NewConfigValue()
@@ -265,7 +326,7 @@ namespace DalTest
                                 DisplayConfigValue();
                                 break;
                             case ConfigSubMenu.Reset:
-                                s_dalConfig.Reset();
+                                ResetData();
                                 break;
                             default:
                                 break;
@@ -287,7 +348,7 @@ namespace DalTest
 
         public static void ResetDataBase()
         {
-            Initialization.Do(s_Assignment, s_Call, s_Volunteer, s_dalConfig);
+            Initialization.Do(s_Assignment, s_Call, s_Volunteer);
         }
 
         public static void DisplayDataBase()
@@ -329,6 +390,30 @@ namespace DalTest
         {
             string input = Console.ReadLine();
             return string.IsNullOrEmpty(input) ? (T?)null : Enum.TryParse(input, true, out T result) ? result : (T?)null;
+        }
+        static T GetEnumFromUser<T>() where T : struct, Enum
+        {
+            while (true)
+            {
+                Console.WriteLine($"Please enter a value of type {typeof(T).Name}:");
+                string input = Console.ReadLine();
+
+                if (Enum.TryParse(input, true, out T result))
+                    return result;
+
+                Console.WriteLine("Invalid input. Please try again.");
+            }
+        }
+
+
+        static double GetDoubleFromUser() =>
+            double.TryParse(Console.ReadLine(), out double value) ? value : 0;
+
+        static bool GetBoolFromUser()
+        {
+            string input = Console.ReadLine();
+            bool.TryParse(input, out bool result);
+            return result; // מחזירים את התוצאה
         }
 
         static void Main(string[] args)

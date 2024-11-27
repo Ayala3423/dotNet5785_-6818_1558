@@ -3,7 +3,8 @@
 public interface IConfig
 {
     DateTime Clock { get; set; }
-    int NextCalled { get; }
+    int NextCallId { get; }
+    int NextAssignmentId { get; }
 
     //...
     void Reset();
