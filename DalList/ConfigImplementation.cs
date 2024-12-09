@@ -1,18 +1,19 @@
-﻿using DalApi;
-using DO;
-
-namespace Dal;
-
+﻿namespace Dal;
+using DalApi;
 internal class ConfigImplementation : IConfig
 {
-    public DateTime Clock { get => throw new DalNotImplementedProperty("The Property does not Implemented"); set => throw new DalNotImplementedProperty("The Property does not Implemented"); }
-
-    public int NextCallId => throw new DalNotImplementedProperty("The Property does not Implemented");
-
-    public int NextAssignmentId => throw new DalNotImplementedProperty("The Property does not Implemented");
-
+    public DateTime Clock
+    {
+        get => Config.Clock;
+        set => Config.Clock = value;
+    }
+    public TimeSpan RiskRange
+    {
+        get => Config.RiskRange;
+        set => Config.RiskRange = value;
+    }
     public void Reset()
     {
-        throw new DalNotImplementedProperty("The Property does not Implemented");
+        Config.Reset();
     }
 }

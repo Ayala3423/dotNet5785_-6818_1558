@@ -10,62 +10,7 @@ public static class Initialization
     private static IDal? s_dal; //stage 2
     private static readonly Random s_rand = new();
 
-    private static void createAssignments()
-    {
-        // טווח לפני ואחרי זמן הסיום
-        TimeSpan rangeBefore = TimeSpan.FromHours(5); // עד 5 שעות לפני
-        TimeSpan rangeAfter = TimeSpan.FromHours(3);  // עד 3 שעות אחרי
-
-        int timesGreater = 0; // מונה למקרים ש-randomTime יהיה גדול מ-EndCallTime
-
-        for (int i = 0; i < 50; i++)
-        {
-            int randomIndexCall = s_rand.Next(0, s_dal.Call.ReadAll().Count() - 15);
-            int randomIndexVolunteer = s_rand.Next(0, s_dal.Volunteer.ReadAll().Count() - 5);
-
-            int selectedIdCall = s_dal.Call.ReadAll().ElementAt(randomIndexCall).Id;
-            TimeSpan timeSpan = (TimeSpan)(s_dal.Call.Read(selectedIdCall).EndCallTime - s_dal.Call.Read(selectedIdCall).OpenCallTime);
-            double randomSeconds = s_rand.NextDouble() * timeSpan.TotalSeconds;
-
-            DateTime endCallTime = (DateTime)s_dal.Call.Read(selectedIdCall).EndCallTime;
-            DateTime randomTime;
-            EndTypeAssignment endTypeAssignment;
-            // שליטה בערך של randomTime
-            if (timesGreater < 25 && i >= 30) // 20 פעמים ש-randomTime יהיה אחרי EndCallTime
-            {
-                double randomOffsetInSeconds = s_rand.NextDouble() * rangeAfter.TotalSeconds;
-                randomTime = endCallTime.AddSeconds(randomOffsetInSeconds); // זמן אחרי EndCallTime
-                timesGreater++;
-                endTypeAssignment = (EndTypeAssignment)s_rand.Next(0, 4);
-            }
-            else // 30 פעמים ש-randomTime יהיה קטן או שווה ל-EndCallTime
-            {
-                double randomOffsetInSeconds = -(s_rand.NextDouble() * rangeBefore.TotalSeconds);
-                randomTime = endCallTime.AddSeconds(randomOffsetInSeconds); // זמן לפני EndCallTime
-                endTypeAssignment = EndTypeAssignment.ExpiredCancellation;
-            }
-
-            // יצירת אובייקט Assignment
-            Assignment assignment = new Assignment(
-                0,
-                selectedIdCall,
-                s_dal.Volunteer.ReadAll().ElementAt(randomIndexVolunteer).Id,
-                s_dal.Call.Read(selectedIdCall).OpenCallTime,
-                s_dal.Call.Read(selectedIdCall).OpenCallTime.AddSeconds(randomSeconds),
-                //randomTime,
-                endTypeAssignment
-            );
-
-            // בדיקת קיום והוספת Assignment
-            Assignment? checkAssignment = s_dal.Assignment.Read(assignment.Id);
-            if (checkAssignment == null)
-            {
-                s_dal.Assignment.Create(assignment);
-            }
-        }
-    }
-
-    private static void createCalls()
+    private static void CreateCalls()
     {
         string[] CallAddresses = new string[]
         {
@@ -205,33 +150,23 @@ public static class Initialization
             "חלוקת מזון חם בשוק הקהילתי"
         };
 
-        Random random = new Random();
+        Random random = new();
 
         for (int i = 0; i < 25; i++)
         {
-            Call call = new Call(0, CallAddresses[i], Latitudes[i], Longitudes[i], s_dal.Config.Clock.AddHours(-(random.Next(1, 5))), foodPreparation[i], s_dal.Config.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodPreparation);
-            Call? checkCall = s_dal.Call?.Read(call.Id);
-            if (checkCall != null)
-            {
-                s_dal.Call?.Create(checkCall);
-            }
+            Call call = new(0, CallAddresses[i], Latitudes[i], Longitudes[i], s_dal!.Config.Clock.AddHours(-(random.Next(1, 5))), foodPreparation[i], s_dal.Config.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodPreparation);
+            s_dal.Call?.Create(call);
         }
-
         for (int i = 0; i < 25; i++)
         {
-            Call call = new Call(0, CallAddresses[i], Latitudes[25 + i], Longitudes[25 + i], s_dal.Config.Clock.AddHours(-(random.Next(1, 5))), foodDelivery[i], s_dal.Config.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodDelivery);
-            Call? checkCall = s_dal.Call?.Read(call.Id);
-            if (checkCall != null)
-            {
-                s_dal.Call?.Create(checkCall);
-            }
+            Call call = new(0, CallAddresses[i], Latitudes[25 + i], Longitudes[25 + i], s_dal!.Config.Clock.AddHours(-(random.Next(1, 5))), foodDelivery[i], s_dal.Config.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodDelivery);
+            s_dal.Call?.Create(call);
         }
-
     }
 
-    private static void createVolunteers()
+    private static void CreateVolunteers()
     {
-        Random random = new Random();
+        Random random = new();
         string[] firstNames = new string[]
         {
             "John", "Jane", "Michael", "Emily", "William",
@@ -275,7 +210,6 @@ public static class Initialization
             "0555432109", "0584321098", "0503210987", "0522109876", "0531098765",
             "0540987654", "0559876501", "0588765402", "0507654303", "0526543204"
          };
-
         string[] passwords = new string[]
         {
             "A1b!cD2@eF3g",
@@ -323,16 +257,16 @@ public static class Initialization
             "רחוב אלנבי 60, תל אביב"
         };
 
-        Volunteer administarator = new Volunteer(random.Next(200000000, 400000001), "ayala", "meruven", "0501234567", "ayalaMeruven@gmail.com", "A1b!c89&eF3g", "רחוב דיזנגוף 10, תל אביב", null, null, null, true, Role.Administrator, DistanceType.AirDistance);
-        Volunteer? checkAdministarator = s_dal.Volunteer.Read(administarator.Id);
-        if (checkAdministarator != null)
+        Volunteer administarator = new(random.Next(200000000, 400000001), "ayala", "meruven", "0501234567", "ayalaMeruven@gmail.com", "A1b!c89&eF3g", "רחוב דיזנגוף 10, תל אביב", null, null, null, true, Role.Administrator, DistanceType.AirDistance);
+        Volunteer? checkAdministarator = s_dal!.Volunteer.Read(administarator.Id);
+        if (checkAdministarator == null)
         {
-            s_dal.Volunteer.Create(checkAdministarator);
+            s_dal.Volunteer.Create(administarator);
         }
 
         for (int i = 0; i < 20; i++)
         {
-            Volunteer volunteer = new Volunteer(
+            Volunteer volunteer = new(
                 random.Next(200000000, 400000001),
                 firstNames[i],
                 lastNames[i],
@@ -347,24 +281,78 @@ public static class Initialization
                 Role.Volunteer,
                 DistanceType.AirDistance);
             Volunteer? checkVolunteer = s_dal.Volunteer.Read(volunteer.Id);
-            if (checkVolunteer != null)
+            if (checkVolunteer == null)
             {
                 s_dal.Volunteer.Create(volunteer);
             }
         }
     }
 
-    //public static void Do(IStudent? dalStudent, ICourse? dalCourse, ILink? dalStudentInCourse, IConfig? dalConfig) // stage 1
+    private static void CreateAssignments()
+    {
+        // טווח לפני ואחרי זמן הסיום
+        TimeSpan rangeBefore = TimeSpan.FromHours(5); // עד 5 שעות לפני
+        TimeSpan rangeAfter = TimeSpan.FromHours(3);  // עד 3 שעות אחרי
+
+        int timesGreater = 0; // מונה למקרים ש-randomTime יהיה גדול מ-EndCallTime
+
+        var existingCalls = s_dal!.Call.ReadAll();
+        var callsSize = existingCalls.Count();
+        Console.WriteLine(callsSize);
+
+        for (int i = 0; i < 50; i++)
+        {
+            int randomIndexCall = s_rand.Next(0, callsSize - 15);
+            int randomIndexVolunteer = s_rand.Next(0, s_dal!.Volunteer.ReadAll().Count() - 5);
+            int selectedIdCall = s_dal.Call.ReadAll().ElementAt(randomIndexCall).Id;
+            TimeSpan timeSpan = (TimeSpan)(s_dal.Call.Read(selectedIdCall).EndCallTime - s_dal.Call.Read(selectedIdCall).OpenCallTime);
+            double randomSeconds = s_rand.NextDouble() * timeSpan.TotalSeconds;
+
+            DateTime endCallTime = (DateTime)s_dal.Call.Read(selectedIdCall).EndCallTime;
+            DateTime randomTime;
+            EndTypeAssignment endTypeAssignment;
+            // שליטה בערך של randomTime
+            if (timesGreater < 25 && i >= 30) // 20 פעמים ש-randomTime יהיה אחרי EndCallTime
+            {
+                double randomOffsetInSeconds = s_rand.NextDouble() * rangeAfter.TotalSeconds;
+                randomTime = endCallTime.AddSeconds(randomOffsetInSeconds); // זמן אחרי EndCallTime
+                timesGreater++;
+                endTypeAssignment = (EndTypeAssignment)s_rand.Next(0, 4);
+            }
+            else // 30 פעמים ש-randomTime יהיה קטן או שווה ל-EndCallTime
+            {
+                double randomOffsetInSeconds = -(s_rand.NextDouble() * rangeBefore.TotalSeconds);
+                randomTime = endCallTime.AddSeconds(randomOffsetInSeconds); // זמן לפני EndCallTime
+                endTypeAssignment = EndTypeAssignment.ExpiredCancellation;
+            }
+
+            // יצירת אובייקט Assignment
+            Assignment assignment = new Assignment(
+                0,
+                selectedIdCall,
+                s_dal.Volunteer.ReadAll().ElementAt(randomIndexVolunteer).Id,
+                s_dal.Call.Read(selectedIdCall)!.OpenCallTime,
+                s_dal.Call.Read(selectedIdCall)!.OpenCallTime.AddSeconds(randomSeconds),
+                //randomTime,
+                endTypeAssignment
+            );
+
+            // בדיקת קיום והוספת Assignment
+            Assignment? checkAssignment = s_dal.Assignment.Read(assignment.Id);
+            if (checkAssignment == null)
+            {
+                s_dal.Assignment.Create(assignment);
+            }
+        }
+    }
+
     public static void Do(IDal dal) //stage 2
     {
         s_dal = dal ?? throw new NullReferenceException("DAL object can not be null!"); // stage 2
-
         Console.WriteLine("Reset Configuration values and List values...");
         s_dal.ResetDB(); //stage 2
-
-        createAssignments();
-        createCalls();
-        createVolunteers();
+        CreateCalls();
+        CreateVolunteers();
+        CreateAssignments();
     }
-
 }

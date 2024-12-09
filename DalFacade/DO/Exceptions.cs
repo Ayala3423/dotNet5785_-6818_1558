@@ -24,9 +24,9 @@ public class DalDeletionImpossible : Exception
 {
     public DalDeletionImpossible(string? message) : base(message) { }
 }
-
-// Exception thrown when a property or method is not implemented
-public class DalNotImplementedProperty : Exception
+public class DalNoData : Exception
 {
-    public DalNotImplementedProperty(string? message) : base(message) { }
+    public DalNoData(string? message) : base(message) { }
 }
+
+

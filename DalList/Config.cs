@@ -11,11 +11,12 @@ internal static class Config
 
     private static readonly DateTime now = DateTime.Now;
     internal static DateTime Clock = now;
-    internal static TimeSpan RiskRange;
-
+    internal static TimeSpan RiskRange { get; set; } = TimeSpan.Zero;
     internal static void Reset()
     {
         _nextCallId = startCallID;
         _nextAssignmentID = startAssignmentID;
+        Clock = DateTime.Now;
+        RiskRange = TimeSpan.Zero;
     }
 }

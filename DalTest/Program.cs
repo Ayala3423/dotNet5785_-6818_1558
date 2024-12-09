@@ -91,7 +91,6 @@ namespace DalTest
 
         public static void DisplayEntitySubMenu()
         {
-
             Console.WriteLine("בחר פעולה מתוך התפריט:");
 
             // הצגת הערכים של ה-enum למשתמש
@@ -117,7 +116,7 @@ namespace DalTest
                                 break;
                             case EntitySubMenu.Read:
                                 Console.WriteLine("הכנס מספר מזהה:");
-                                string inputRead = Console.ReadLine();
+                                string? inputRead = Console.ReadLine();
                                 int.TryParse(inputRead, out int IdNumberRead);
                                 s_dal.Assignment.Read(IdNumberRead);
                                 break;
@@ -126,11 +125,11 @@ namespace DalTest
                                 break;
                             case EntitySubMenu.UpDate:
                                 Console.WriteLine("הכנס מספר מזהה:");
-                                string inputUpdate = Console.ReadLine();
+                                string? inputUpdate = Console.ReadLine();
                                 int.TryParse(inputUpdate, out int IdNumberUpdate);
                                 Console.WriteLine("בחר פרמטר לשינוי:");
-                                string parameterToUpdate = Console.ReadLine();
-                                Assignment assignment = s_dal.Assignment.Read(IdNumberUpdate);
+                                string? parameterToUpdate = Console.ReadLine();
+                                Assignment? assignment = s_dal.Assignment.Read(IdNumberUpdate);
                                 switch (parameterToUpdate)
                                 {
                                     case "Id":
@@ -171,7 +170,7 @@ namespace DalTest
                                 break;
                             case EntitySubMenu.Delete:
                                 Console.WriteLine("הכנס מספר מזהה:");
-                                string inputDelete = Console.ReadLine();
+                                string? inputDelete = Console.ReadLine();
                                 int.TryParse(inputDelete, out int IdNumberDelete);
                                 s_dal.Assignment.Delete(IdNumberDelete);
                                 break;
@@ -214,7 +213,7 @@ namespace DalTest
                     break;
                 case "Call":
                     Console.WriteLine("Enter Address:");
-                    string callAddress = Console.ReadLine();
+                    string? callAddress = Console.ReadLine();
                     Console.WriteLine("Enter Latitude:");
                     double callLatitude = GetDoubleFromUser();
                     Console.WriteLine("Enter Longitude:");
@@ -227,7 +226,7 @@ namespace DalTest
                     DateTime? callEndCallTime = GetNullableDateTimeFromUser();
                     Console.WriteLine("Enter TypeCall:");
                     TypeCall typeCall = GetEnumFromUser<TypeCall>();
-                    Call newCall = new Call(0, callAddress, callLatitude, callLongitude, callOpenCallTime, callDescribeCall, callEndCallTime, typeCall);
+                    Call newCall = new(0, callAddress, callLatitude, callLongitude, callOpenCallTime, callDescribeCall, callEndCallTime, typeCall);
                     s_dal.Call.Create(newCall);
                     break;
 
@@ -235,17 +234,17 @@ namespace DalTest
                     Console.WriteLine("Enter Volunteer Id:");
                     int volunteerId = GetIntFromUser();
                     Console.WriteLine("Enter First Name:");
-                    string volunteerFirstName = Console.ReadLine();
+                    string? volunteerFirstName = Console.ReadLine();
                     Console.WriteLine("Enter Last Name:");
-                    string volunteerLastName = Console.ReadLine();
+                    string? volunteerLastName = Console.ReadLine();
                     Console.WriteLine("Enter Phone Number:");
-                    string volunteerPhone = Console.ReadLine();
+                    string? volunteerPhone = Console.ReadLine();
                     Console.WriteLine("Enter Email:");
-                    string volunteerEmail = Console.ReadLine();
+                    string? volunteerEmail = Console.ReadLine();
                     Console.WriteLine("Enter Password:");
-                    string volunteerPassword = Console.ReadLine();
+                    string? volunteerPassword = Console.ReadLine();
                     Console.WriteLine("Enter Address:");
-                    string volunteerAddress = Console.ReadLine();
+                    string? volunteerAddress = Console.ReadLine();
                     Console.WriteLine("Enter Latitude:");
                     double volunteerLatitude = GetDoubleFromUser();
                     Console.WriteLine("Enter Longitude:");
@@ -286,18 +285,16 @@ namespace DalTest
             try
             {
                 Console.WriteLine("Enter an option");
-
                 // הצגת הערכים של ה-enum למשתמש
                 foreach (ConfigSubMenu option in Enum.GetValues(typeof(ConfigSubMenu)))
                 {
                     Console.WriteLine($"{(int)option}. {option}");
                 }
-
                 // קלט מהמשתמש
                 int userChoice;
                 if (int.TryParse(Console.ReadLine(), out userChoice) && Enum.IsDefined(typeof(ConfigSubMenu), userChoice))
                 {
-                    ConfigSubMenu selectedOption = (ConfigSubMenu)userChoice;
+                    ConfigSubMenu? selectedOption = (ConfigSubMenu)userChoice;
                     Console.WriteLine($"בחרת את האפשרות: {selectedOption}");
                     while (selectedOption != ConfigSubMenu.Exit)
                     {
@@ -328,13 +325,11 @@ namespace DalTest
                                 break;
                         }
                     }
-
                 }
                 else
                 {
                     Console.WriteLine("בחירה לא חוקית.");
                 }
-
             }
             catch (Exception exception)
             {
@@ -363,7 +358,6 @@ namespace DalTest
             }
         }
 
-
         public static void ResetData()
         {
             s_dal.Config.Reset();
@@ -385,7 +379,7 @@ namespace DalTest
 
         static T? GetNullableEnumFromUser<T>() where T : struct
         {
-            string input = Console.ReadLine();
+            string? input = Console.ReadLine();
             return string.IsNullOrEmpty(input) ? (T?)null : Enum.TryParse(input, true, out T result) ? result : (T?)null;
         }
         static T GetEnumFromUser<T>() where T : struct, Enum
@@ -393,7 +387,7 @@ namespace DalTest
             while (true)
             {
                 Console.WriteLine($"Please enter a value of type {typeof(T).Name}:");
-                string input = Console.ReadLine();
+                string? input = Console.ReadLine();
 
                 if (Enum.TryParse(input, true, out T result))
                     return result;
@@ -408,7 +402,7 @@ namespace DalTest
 
         static bool GetBoolFromUser()
         {
-            string input = Console.ReadLine();
+            string? input = Console.ReadLine();
             bool.TryParse(input, out bool result);
             return result; // מחזירים את התוצאה
         }
