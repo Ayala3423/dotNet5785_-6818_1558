@@ -1,6 +1,8 @@
 ﻿namespace DalApi;
 
-public interface IEnums
+using DO;
+
+public interface IAssignment : ICrud<Enums>
 {
-   
+
 }
