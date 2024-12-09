@@ -1,19 +1,21 @@
 ﻿namespace Dal;
+
 internal static class Config
 {
-    internal const int NextCalled = 1000;
-    private static int NextAssignmentId = NextCalled;
-    internal static int NextAssignmentId2 { get => NextAssignmentId++; }
-    internal static TimeSpan RiskRange { get; set; }
+    internal const int startCallID = 0;
+    private static int _nextCallId = startCallID;
+    internal static int nextCallId { get => _nextCallId++; }
+    internal const int startAssignmentID = 0;
+    private static int _nextAssignmentID = startAssignmentID;
+    internal static int nextAssignmentId { get => _nextAssignmentID++; }
 
-    internal static DateTime Clock { get; set; } = DateTime.Now;
-    //...
+    private static readonly DateTime now = DateTime.Now;
+    internal static DateTime Clock = now;
+    internal static TimeSpan RiskRange;
 
     internal static void Reset()
     {
-        NextAssignmentId = NextCalled;
-        //...
-        Clock = DateTime.Now;
-        //...
+        _nextCallId = startCallID;
+        _nextAssignmentID = startAssignmentID;
     }
 }

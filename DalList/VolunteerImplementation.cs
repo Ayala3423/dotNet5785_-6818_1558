@@ -7,20 +7,11 @@ public class VolunteerImplementation : IVolunteer
 {
     public void Create(Volunteer item)
     {
-        if (item.Id)
-        {
+        
             if (DataSource.Volunteers.Any(e => e.Id == item.Id))
-                throw new NotImplementedException($"The Call Item with id {item.id} is already exist");
+                throw new NotImplementedException($"The Call Item with id {item.Id} is already exist");
             DataSource.Volunteers.Add(item);
-        }
-        else
-        {
-            Volunteer itemCopy = item;
-            int newId = Config.NextAssignmentId; //לבדוק
-            itemCopy.Id = newId;
-            DataSource.Volunteers.Add(itemCopy);
-            //return newId;
-        }
+       
     }
     public Volunteer? Read(int id)
     {
@@ -37,8 +28,8 @@ public class VolunteerImplementation : IVolunteer
     {
 
         if (!DataSource.Volunteers.Any(e => e.Id == item.Id))
-            throw new NotImplementedException($"The Call Item with id {item.id} isn't exist");
-        DataSource.Volunteers.RemovAll(e => e.Id == item.Id);
+            throw new NotImplementedException($"The Call Item with id {item.Id} isn't exist");
+        DataSource.Volunteers.RemoveAll(e => e.Id == item.Id);
         DataSource.Volunteers.Add(item);
 
     }
@@ -46,7 +37,7 @@ public class VolunteerImplementation : IVolunteer
     {
         if (!DataSource.Volunteers.Any(e => e.Id == id))
             throw new NotImplementedException($"The Call Item with id {id} isn't exist");
-        DataSource.Volunteers.RemovAll(e => e.Id == id);
+        DataSource.Volunteers.RemoveAll(e => e.Id == id);
     }
     public void DeleteAll()
     {

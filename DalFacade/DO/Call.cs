@@ -1,6 +1,5 @@
 ﻿namespace DO;
 
-
 public record Call
 (
     /// <summary>

@@ -7,20 +7,13 @@ public class CallImplementation : ICall
 {
     public void Create(Call item)
     {
-        if (item.Id)
-        {
+        
             if (DataSource.Calls.Any(e => e.Id == item.Id))
-                throw new NotImplementedException($"The Call Item with id {item.id} is already exist");
+                throw new NotImplementedException($"The Call Item with id {item.Id} is already exist");
             DataSource.Calls.Add(item);
-        }
-        else
-        {
-            Call itemCopy = item;
-            int newId = Config.NextAssignmentId; //לבדוק
-            itemCopy.Id = newId;
-            DataSource.Calls.Add(itemCopy);
-            //return newId;
-        }
+        int newId = Config.nextCallId;
+        Call copyItem = item with { Id = newId };
+        DataSource.Calls.Add(copyItem);
     }
     public Call? Read(int id) 
     {
@@ -37,8 +30,8 @@ public class CallImplementation : ICall
     {
 
         if (!DataSource.Calls.Any(e => e.Id == item.Id))
-            throw new NotImplementedException($"The Call Item with id {item.id} isn't exist");
-        DataSource.Calls.RemovAll(e => e.Id == item.Id);
+            throw new NotImplementedException($"The Call Item with id {item.Id} isn't exist");
+        DataSource.Calls.RemoveAll(e => e.Id == item.Id);
         DataSource.Calls.Add(item);
 
     }
@@ -46,7 +39,7 @@ public class CallImplementation : ICall
     {
         if (!DataSource.Calls.Any(e => e.Id == id))
             throw new NotImplementedException($"The Call Item with id {id} isn't exist");
-        DataSource.Calls.RemovAll(e => e.Id == id);
+        DataSource.Calls.RemoveAll(e => e.Id == id);
     }
     public void DeleteAll()
     {
