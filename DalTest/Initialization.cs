@@ -2,16 +2,12 @@
 
 using DalApi;
 using DO;
-using DalList;
 using System.Data;
 using System;
 
 public static class Initialization
 {
-    private static IAssignment? s_dalAssignment; //stage 1
-    private static ICall? s_dalCall; //stage 1
-    private static IVolunteer? s_dalVolunteer; //stage 1
-    private static readonly IConfig? s_dalConfig; //stage 1
+    private static IDal? s_dal; //stage 2
     private static readonly Random s_rand = new();
 
     private static void createAssignments()
@@ -24,14 +20,14 @@ public static class Initialization
 
         for (int i = 0; i < 50; i++)
         {
-            int randomIndexCall = s_rand.Next(0, s_dalCall.ReadAll().Count - 15);
-            int randomIndexVolunteer = s_rand.Next(0, s_dalVolunteer.ReadAll().Count - 5);
+            int randomIndexCall = s_rand.Next(0, s_dal.Call.ReadAll().Count() - 15);
+            int randomIndexVolunteer = s_rand.Next(0, s_dal.Volunteer.ReadAll().Count() - 5);
 
-            int selectedIdCall = s_dalCall.ReadAll()[randomIndexCall].Id;
-            TimeSpan timeSpan = (TimeSpan)(s_dalCall.Read(selectedIdCall).EndCallTime - s_dalCall.Read(selectedIdCall).OpenCallTime);
+            int selectedIdCall = s_dal.Call.ReadAll().ElementAt(randomIndexCall).Id;
+            TimeSpan timeSpan = (TimeSpan)(s_dal.Call.Read(selectedIdCall).EndCallTime - s_dal.Call.Read(selectedIdCall).OpenCallTime);
             double randomSeconds = s_rand.NextDouble() * timeSpan.TotalSeconds;
 
-            DateTime endCallTime = (DateTime)s_dalCall.Read(selectedIdCall).EndCallTime;
+            DateTime endCallTime = (DateTime)s_dal.Call.Read(selectedIdCall).EndCallTime;
             DateTime randomTime;
             EndTypeAssignment endTypeAssignment;
             // שליטה בערך של randomTime
@@ -53,21 +49,21 @@ public static class Initialization
             Assignment assignment = new Assignment(
                 0,
                 selectedIdCall,
-                s_dalVolunteer.ReadAll()[randomIndexVolunteer].Id,
-                s_dalCall.Read(selectedIdCall).OpenCallTime,
-                s_dalCall.Read(selectedIdCall).OpenCallTime.AddSeconds(randomSeconds),
+                s_dal.Volunteer.ReadAll().ElementAt(randomIndexVolunteer).Id,
+                s_dal.Call.Read(selectedIdCall).OpenCallTime,
+                s_dal.Call.Read(selectedIdCall).OpenCallTime.AddSeconds(randomSeconds),
                 //randomTime,
                 endTypeAssignment
             );
 
             // בדיקת קיום והוספת Assignment
-            Assignment? checkAssignment = s_dalAssignment.Read(assignment.Id);
+            Assignment? checkAssignment = s_dal.Assignment.Read(assignment.Id);
             if (checkAssignment == null)
             {
-                s_dalAssignment.Create(assignment);
+                s_dal.Assignment.Create(assignment);
             }
         }
-}
+    }
 
     private static void createCalls()
     {
@@ -210,24 +206,24 @@ public static class Initialization
         };
 
         Random random = new Random();
-        
+
         for (int i = 0; i < 25; i++)
         {
-            Call call = new Call(0, CallAddresses[i], Latitudes[i], Longitudes[i], s_dalConfig.Clock.AddHours(-(random.Next(1, 5))), foodPreparation[i], s_dalConfig.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodPreparation);
-            Call? checkCall = s_dalCall?.Read(call.Id);
+            Call call = new Call(0, CallAddresses[i], Latitudes[i], Longitudes[i], s_dal.Config.Clock.AddHours(-(random.Next(1, 5))), foodPreparation[i], s_dal.Config.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodPreparation);
+            Call? checkCall = s_dal.Call?.Read(call.Id);
             if (checkCall != null)
             {
-                s_dalCall?.Create(checkCall);
+                s_dal.Call?.Create(checkCall);
             }
         }
 
         for (int i = 0; i < 25; i++)
         {
-            Call call = new Call(0, CallAddresses[i], Latitudes[25+i], Longitudes[25+i], s_dalConfig.Clock.AddHours(-(random.Next(1, 5))), foodDelivery[i], s_dalConfig.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodDelivery);
-            Call? checkCall = s_dalCall?.Read(call.Id);
+            Call call = new Call(0, CallAddresses[i], Latitudes[25 + i], Longitudes[25 + i], s_dal.Config.Clock.AddHours(-(random.Next(1, 5))), foodDelivery[i], s_dal.Config.Clock.AddHours(random.Next(1, 5)), TypeCall.FoodDelivery);
+            Call? checkCall = s_dal.Call?.Read(call.Id);
             if (checkCall != null)
             {
-                s_dalCall?.Create(checkCall);
+                s_dal.Call?.Create(checkCall);
             }
         }
 
@@ -328,10 +324,10 @@ public static class Initialization
         };
 
         Volunteer administarator = new Volunteer(random.Next(200000000, 400000001), "ayala", "meruven", "0501234567", "ayalaMeruven@gmail.com", "A1b!c89&eF3g", "רחוב דיזנגוף 10, תל אביב", null, null, null, true, Role.Administrator, DistanceType.AirDistance);
-            Volunteer? checkAdministarator = s_dalVolunteer.Read(administarator.Id);
+        Volunteer? checkAdministarator = s_dal.Volunteer.Read(administarator.Id);
         if (checkAdministarator != null)
         {
-            s_dalVolunteer.Create(checkAdministarator);
+            s_dal.Volunteer.Create(checkAdministarator);
         }
 
         for (int i = 0; i < 20; i++)
@@ -350,31 +346,25 @@ public static class Initialization
                 true,
                 Role.Volunteer,
                 DistanceType.AirDistance);
-            Volunteer? checkVolunteer = s_dalVolunteer.Read(volunteer.Id);
+            Volunteer? checkVolunteer = s_dal.Volunteer.Read(volunteer.Id);
             if (checkVolunteer != null)
             {
-                s_dalVolunteer.Create(volunteer);
+                s_dal.Volunteer.Create(volunteer);
             }
         }
     }
 
-    public static void Do(IAssignment? dalIAssignment, ICall? dalCall, IVolunteer? dalVolunteer) //stage 1
+    //public static void Do(IStudent? dalStudent, ICourse? dalCourse, ILink? dalStudentInCourse, IConfig? dalConfig) // stage 1
+    public static void Do(IDal dal) //stage 2
     {
-        s_dalAssignment = dalIAssignment ?? throw new NullReferenceException("DAL object can not be null!"); //stage 1
-        s_dalCall = dalCall ?? throw new NullReferenceException("DAL object can not be null!"); //stage 1
-        s_dalVolunteer = dalVolunteer ?? throw new NullReferenceException("DAL object can not be null!");
-      
+        s_dal = dal ?? throw new NullReferenceException("DAL object can not be null!"); // stage 2
+
         Console.WriteLine("Reset Configuration values and List values...");
-        s_dalConfig?.Reset(); 
-        s_dalAssignment.DeleteAll(); 
-        s_dalConfig?.Reset(); 
-        s_dalCall.DeleteAll();
-        s_dalConfig?.Reset(); 
-        s_dalVolunteer.DeleteAll();
-        Console.WriteLine("Initializing Students list ...");
+        s_dal.ResetDB(); //stage 2
+
         createAssignments();
         createCalls();
         createVolunteers();
-
     }
+
 }

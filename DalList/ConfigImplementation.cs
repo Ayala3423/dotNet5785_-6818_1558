@@ -1,17 +1,18 @@
 ﻿using DalApi;
+using DO;
 
 namespace Dal;
 
-public class ConfigImplementation : IConfig
+internal class ConfigImplementation : IConfig
 {
-    public DateTime Clock { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public DateTime Clock { get => throw new DalNotImplementedProperty("The Property does not Implemented"); set => throw new DalNotImplementedProperty("The Property does not Implemented"); }
 
-    public int NextCallId => throw new NotImplementedException();
+    public int NextCallId => throw new DalNotImplementedProperty("The Property does not Implemented");
 
-    public int NextAssignmentId => throw new NotImplementedException();
+    public int NextAssignmentId => throw new DalNotImplementedProperty("The Property does not Implemented");
 
     public void Reset()
     {
-        throw new NotImplementedException();
+        throw new DalNotImplementedProperty("The Property does not Implemented");
     }
 }

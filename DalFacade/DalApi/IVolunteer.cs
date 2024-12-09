@@ -2,7 +2,7 @@
 
 using DO;
 
-public interface IAssignment : ICrud<Volunteer>
+public interface IVolunteer : ICrud<Volunteer>
 {
 
 }

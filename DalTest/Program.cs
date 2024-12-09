@@ -1,16 +1,12 @@
 ﻿using DalApi;
 using Dal;
 using DO;
-using DalList;
 using System.Reflection.Metadata;
 namespace DalTest
 {
     internal class Program
     {
-        private static IAssignment? s_Assignment = new AssignmentImplementation();
-        private static ICall? s_Call = new CallImplementation();
-        private static IVolunteer? s_Volunteer = new VolunteerImplementation();
-        private static IConfig? s_dalConfig = new ConfigImplementation();
+        static readonly IDal s_dal = new Dal.DalList(); //stage 2
         public static void DisplayMenu()
         {
             try
@@ -123,10 +119,10 @@ namespace DalTest
                                 Console.WriteLine("הכנס מספר מזהה:");
                                 string inputRead = Console.ReadLine();
                                 int.TryParse(inputRead, out int IdNumberRead);
-                                s_Assignment.Read(IdNumberRead);
+                                s_dal.Assignment.Read(IdNumberRead);
                                 break;
                             case EntitySubMenu.ReadAll:
-                                s_Assignment.ReadAll();
+                                s_dal.Assignment.ReadAll();
                                 break;
                             case EntitySubMenu.UpDate:
                                 Console.WriteLine("הכנס מספר מזהה:");
@@ -134,7 +130,7 @@ namespace DalTest
                                 int.TryParse(inputUpdate, out int IdNumberUpdate);
                                 Console.WriteLine("בחר פרמטר לשינוי:");
                                 string parameterToUpdate = Console.ReadLine();
-                                Assignment assignment = s_Assignment.Read(IdNumberUpdate);
+                                Assignment assignment = s_dal.Assignment.Read(IdNumberUpdate);
                                 switch (parameterToUpdate)
                                 {
                                     case "Id":
@@ -171,16 +167,16 @@ namespace DalTest
                                         Console.WriteLine("Invalid parameter name. No changes made.");
                                         break;
                                 }
-                                s_Assignment.Update(assignment);
+                                s_dal.Assignment.Update(assignment);
                                 break;
                             case EntitySubMenu.Delete:
                                 Console.WriteLine("הכנס מספר מזהה:");
                                 string inputDelete = Console.ReadLine();
                                 int.TryParse(inputDelete, out int IdNumberDelete);
-                                s_Assignment.Delete(IdNumberDelete);
+                                s_dal.Assignment.Delete(IdNumberDelete);
                                 break;
                             case EntitySubMenu.DeleteAll:
-                                s_Assignment.DeleteAll();
+                                s_dal.Assignment.DeleteAll();
                                 break;
                             default:
                                 break;
@@ -214,7 +210,7 @@ namespace DalTest
                     Console.WriteLine("Enter End Type Assignment (Treated, SelfCancellation, AdministratorCancellation, ExpiredCancellation) or leave empty for null:");
                     EndTypeAssignment? endType = GetNullableEnumFromUser<EndTypeAssignment>();
                     Assignment newAssignment = new Assignment(0, 0, AssignmentVolunteerId, entryTime, endTime, endType);
-                    s_Assignment.Create(newAssignment);
+                    s_dal.Assignment.Create(newAssignment);
                     break;
                 case "Call":
                     Console.WriteLine("Enter Address:");
@@ -232,7 +228,7 @@ namespace DalTest
                     Console.WriteLine("Enter TypeCall:");
                     TypeCall typeCall = GetEnumFromUser<TypeCall>();
                     Call newCall = new Call(0, callAddress, callLatitude, callLongitude, callOpenCallTime, callDescribeCall, callEndCallTime, typeCall);
-                    s_Call.Create(newCall);
+                    s_dal.Call.Create(newCall);
                     break;
 
                 case "Volunteer":
@@ -270,7 +266,7 @@ namespace DalTest
                         volunteerAddress, volunteerLatitude,
                         volunteerLongitude, volunteerDistance,
                         volunteerActive, role, distanceType);
-                    s_Volunteer.Create(newVolunteer);
+                    s_dal.Volunteer.Create(newVolunteer);
                     break;
             }
         }
@@ -308,16 +304,16 @@ namespace DalTest
                         switch (selectedOption)
                         {
                             case ConfigSubMenu.AdvanceSystemClockMinute:
-                                s_dalConfig.Clock.AddMinutes(1);
+                                s_dal.Config.Clock.AddMinutes(1);
                                 break;
                             case ConfigSubMenu.AdvanceSystemClockHour:
-                                s_dalConfig.Clock.AddHours(1);
+                                s_dal.Config.Clock.AddHours(1);
                                 break;
                             case ConfigSubMenu.AdvanceSystemClockSecond:
-                                s_dalConfig.Clock.AddSeconds(1);
+                                s_dal.Config.Clock.AddSeconds(1);
                                 break;
                             case ConfigSubMenu.DisplaySystemClock:
-                                Console.WriteLine(s_dalConfig.Clock);
+                                Console.WriteLine(s_dal.Config.Clock);
                                 break;
                             case ConfigSubMenu.InsertNewValue:
                                 NewConfigValue();
@@ -348,33 +344,34 @@ namespace DalTest
 
         public static void ResetDataBase()
         {
-            Initialization.Do(s_Assignment, s_Call, s_Volunteer);
+            Initialization.Do(s_dal);
         }
 
         public static void DisplayDataBase()
         {
-            DisplayEntity(s_Assignment.ReadAll(), "Assignment");
-            DisplayEntity(s_Volunteer.ReadAll(), "Volunteer");
-            DisplayEntity(s_Call.ReadAll(), "dalConfig");
+            DisplayEntity(s_dal.Assignment.ReadAll(), "Assignment");
+            DisplayEntity(s_dal.Volunteer.ReadAll(), "Volunteer");
+            DisplayEntity(s_dal.Call.ReadAll(), "dalConfig");
         }
 
-        public static void DisplayEntity<T>(List<T> list, string type)
+        public static void DisplayEntity<T>(IEnumerable<T> collection, string type)
         {
             Console.WriteLine($"Displaying entities of type: {type}");
-            foreach (T item in list)
+            foreach (T item in collection)
             {
                 Console.WriteLine(item);
             }
         }
 
+
         public static void ResetData()
         {
-            s_dalConfig.Reset();
-            s_Assignment.DeleteAll();
-            s_dalConfig.Reset();
-            s_Call.DeleteAll();
-            s_dalConfig.Reset();
-            s_Volunteer.DeleteAll();
+            s_dal.Config.Reset();
+            s_dal.Assignment.DeleteAll();
+            s_dal.Config.Reset();
+            s_dal.Call.DeleteAll();
+            s_dal.Config.Reset();
+            s_dal.Volunteer.DeleteAll();
         }
 
         static int GetIntFromUser() =>
@@ -418,6 +415,7 @@ namespace DalTest
 
         static void Main(string[] args)
         {
+            Initialization.Do(s_dal);
             DisplayMenu();
         }
     }

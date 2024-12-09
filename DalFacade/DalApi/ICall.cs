@@ -2,7 +2,7 @@
 
 using DO;
 
-public interface IAssignment : ICrud<Call>
+public interface ICall : ICrud<Call>
 {
 
 }

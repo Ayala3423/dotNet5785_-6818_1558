@@ -6,7 +6,5 @@ public interface IDal
     ICall Call { get; }
     IVolunteer Volunteer { get; }
     IConfig Config { get; }
-    IEnums Enums { get; }
-    ICrud Crud { get; }
     void ResetDB();
 }
